@@ -35,7 +35,7 @@ if args.model_name:
 SEQ_LENGTH = config['data']['seq_length']
 
 tokenizer_path = config['data']['tokenizer_path']
-tokenizer = GPT2TokenizerFast(tokenizer_file= str(tokenizer_path))
+tokenizer = GPT2TokenizerFast(tokenizer_file = str(tokenizer_path))
 tokenizer.bos_token = "<s>"
 tokenizer.eos_token = "</s>"
 tokenizer.pad_token = "<pad>"
