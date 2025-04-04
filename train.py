@@ -24,6 +24,7 @@ args = parser.parse_args()
 with open(args.config, 'r') as f:
     config = yaml.safe_load(f)
 
+print(config)
 
 # Override config parameters if provided as command-line arguments
 if args.lr:
