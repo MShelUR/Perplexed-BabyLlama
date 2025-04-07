@@ -1,6 +1,7 @@
 /logs
 /wandb
 /drafts
+/slurm
 
 # pretrained tokenizers
 *.pt
