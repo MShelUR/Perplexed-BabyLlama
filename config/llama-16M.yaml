@@ -22,7 +22,7 @@ training:
   fp16: True
 
 logging: 
-  wandb: True
+  wandb: False
   project: "babylm-dev"
   output_dir: "./models/"
 
