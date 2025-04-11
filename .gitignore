@@ -2,6 +2,7 @@
 /wandb
 /drafts
 /slurm
+/models
 
 # pretrained tokenizers
 *.pt
