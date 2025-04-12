@@ -41,7 +41,7 @@ MODEL_OUTPUT = Path('./models') /  MODEL_NAME
 EVAL_SAMPLES = 8192
 
 
-wandb_log = True
+wandb_log = False
 
 
 
@@ -127,7 +127,6 @@ class DistillationTrainer(Trainer):
             all_teacher_logits = [] # [llama, gpt]
             for teacher in self.teachers:
                 outputs_teacher = teacher(**inputs)
-                print(type(teacher))
                 all_teacher_logits.append(outputs_teacher.logits)
             avg_teacher_logits = torch.stack(all_teacher_logits).mean(dim=0)
 
@@ -152,12 +151,7 @@ class DistillationTrainer(Trainer):
         )
         # Return weighted student loss
 
-        print(type(loss_logits_gpt))
-        print(min(loss_logits_llama,loss_logits_gpt))
-
-        exit()
-
-        loss = self.args.alpha * student_loss + (1.0 - self.args.alpha) * min(loss_logits_llama,loss_logits_gpt)
+        loss = self.args.alpha * student_loss + (1.0 - self.args.alpha) * torch.minimum(loss_logits_llama,loss_logits_gpt)
         return (loss, outputs_student) if return_outputs else loss
 
 
