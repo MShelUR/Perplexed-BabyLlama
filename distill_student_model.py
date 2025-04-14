@@ -42,7 +42,7 @@ EVAL_SAMPLES = 8192
 
 
 wandb_log = False
-loss_mode = "weighted" # averaged (base), min, max, weighted
+loss_mode = "weighted" # weighted, min, max
 
 
 tokenizer_path = PATH / "models/gpt-clean-16000.json"
