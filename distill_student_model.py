@@ -42,7 +42,7 @@ EVAL_SAMPLES = 8192
 
 
 wandb_log = False
-
+loss_mode = "weighted" # averaged (base), min, max, weighted
 
 
 tokenizer_path = PATH / "models/gpt-clean-16000.json"
@@ -150,8 +150,30 @@ class DistillationTrainer(Trainer):
             * (self.args.temperature ** 2)
         )
         # Return weighted student loss
+        #print(loss_logits_gpt)
+        #print(loss_logits_llama)
+        loss_logits = None
+        if loss_mode == "weighted":
+            gpt_inv_perplexity = 100/((loss_logits_gpt / (self.args.temperature ** 2)).item() ** 2)
+            llama_inv_perplexity = 100/((loss_logits_llama / (self.args.temperature ** 2)).item() ** 2)
+            total_w = gpt_inv_perplexity + llama_inv_perplexity
+            gpt_weight = gpt_inv_perplexity/total_w
+            llama_weight = llama_inv_perplexity/total_w
 
-        loss = self.args.alpha * student_loss + (1.0 - self.args.alpha) * torch.minimum(loss_logits_llama,loss_logits_gpt)
+            #print(gpt_weight)
+            #print(llama_weight)
+
+            weighted_loss_gpt = torch.mul(loss_logits_gpt,gpt_weight)
+            weighted_loss_llama = torch.mul(loss_logits_llama,llama_weight)
+
+            loss_logits = torch.add(weighted_loss_gpt,weighted_loss_llama)
+        elif loss_mode == "min":
+            loss_logits = torch.minimum(loss_logits_gpt,loss_logits_llama)
+        elif loss_mode == "max":
+            loss_logits = torch.maximum(loss_logits_gpt,loss_logits_llama)
+
+
+        loss = self.args.alpha * student_loss + (1.0 - self.args.alpha) * loss_logits
         return (loss, outputs_student) if return_outputs else loss
 
 
@@ -195,6 +217,7 @@ trainer = DistillationTrainer(
         eval_dataset=eval_dataset,
 
     )
+
 
 
 trainer.train()
