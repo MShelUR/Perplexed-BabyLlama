@@ -23,10 +23,6 @@ python train.py --config ./config/gpt-705M.yaml
 ```
 And analogously for `llama-360M.yaml`.
 One can also rewrite the learning rate and the model name defined in the config by adding arguments `--lr` and `--model_name` respectively. The trained model is saved in the `/models` folder.
-<<<<<<< HEAD
-Once the two teacher models are trained, run `distill_student_model.py` to train the student model using the weighted distillation loss.
-- The loss is by default weighted towards inverse loss scores between the teachers. If you'd like to change this to either the minimum or the maximum of the teachers then change the `loss_mode` variable in `distill_student_mode.py` to `weighted`, `min`, or `max` respectively.
-=======
 
 ## Training the student
 
@@ -34,7 +30,6 @@ Prebuilt versions of the baseline baby llama, as well as the three models you ca
 
 Once the two teacher models are trained, run `distill_student_model.py loss_type` to train the student model using the weighted distillation loss, where `loss_type` is one of the loss types we define.
 - The available loss types that you can train the model with are `min`, `max`, and `weighted`, for minimum/maximum loss and inverse loss weighted training.
->>>>>>> 43edfb0 (Updated distillation and readme)
 
 We modified the Trainer from this [repository](https://github.com/philschmid/knowledge-distillation-transformers-pytorch-sagemaker). Notice that it is not optimized to run on multiple GPUs (teachers are placed on a single GPU).
 With the current settings (model sizes and batch sizes) everything fits on a single 20GB GPU.
