@@ -1,3 +1,9 @@
+import sys
+if len(sys.argv) != 2:
+    raise ValueError("loss type should be specified")
+elif sys.argv[1] not in ["weighted","min","max"]:
+    raise ValueError(f"loss type {sys.argv[1]} not recognized from options: weighted, min, max")
+
 from transformers import (
     GPT2TokenizerFast,
     LlamaForCausalLM,
@@ -20,6 +26,7 @@ import wandb
 from babylm_dataset import BabylmDataset
 
 
+
 #############
 LR = 2.5e-4
 BATCH_SIZE = 32
@@ -27,6 +34,8 @@ SEQ_LENGTH = 128
 
 TEMPERATURE = 2.0
 ALPHA = 0.5
+
+loss_mode = "max" # weighted, min, max
 #############
 
 
@@ -36,13 +45,12 @@ teacher_dir1 = PATH / 'models/Llama-360M'
 teacher_dir2 = PATH / 'models/gpt-705M'
 
 
-MODEL_NAME = f'Baby-Llama-58M'
+MODEL_NAME = f"{loss_mode}_model_and_tokenizer"
 MODEL_OUTPUT = Path('./models') /  MODEL_NAME
 EVAL_SAMPLES = 8192
 
 
 wandb_log = False
-loss_mode = "weighted" # weighted, min, max
 
 
 tokenizer_path = PATH / "models/gpt-clean-16000.json"
@@ -138,7 +146,7 @@ class DistillationTrainer(Trainer):
         loss_logits_llama = (
             loss_function(
                 F.log_softmax(outputs_student.logits / self.args.temperature, dim=-1), # p
-                F.softmax(avg_teacher_logits[0] / self.args.temperature, dim=-1), # q
+                F.softmax(all_teacher_logits[0] / self.args.temperature, dim=-1), # q
             )
             * (self.args.temperature ** 2)
         )
@@ -166,7 +174,7 @@ class DistillationTrainer(Trainer):
             weighted_loss_gpt = torch.mul(loss_logits_gpt,gpt_weight)
             weighted_loss_llama = torch.mul(loss_logits_llama,llama_weight)
 
-            loss_logits = torch.add(weighted_loss_gpt,weighted_loss_llama)
+            loss_logits = torch.stack((weighted_loss_gpt,weighted_loss_llama)).mean(dim = 0)
         elif loss_mode == "min":
             loss_logits = torch.minimum(loss_logits_gpt,loss_logits_llama)
         elif loss_mode == "max":

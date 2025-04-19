@@ -13,18 +13,35 @@ Very basic training code for BabyLlama, our submission to the strict-small track
 We perform some basic regex-based cleaning of the dataset and then train a tokenizer on the cleaned dataset. This is performed in `cleaning_and_tokenization.ipynb`. The notebook assumes that the babylm dataset (`/babylm_10M` and `/babylm_dev`) is placed or symlinked in the `/data` folder.
 The tokenizer is saved in '/models' folder. We use the same tokenizer for both teacher and student models.
 
+## Training the teachers
+
+Prebuilt GPT and Llama teacher models can be found [here](https://drive.google.com/drive/folders/1giV3CF5jPNIW6gcTb22EHQMHDVlUwARf?usp=sharing). We've included the data that you'd need to manually train the teacher models as listed below if you'd prefer building them yourself.
+
 To train the teacher models: 
 ```
 python train.py --config ./config/gpt-705M.yaml
 ```
 And analogously for `llama-360M.yaml`.
 One can also rewrite the learning rate and the model name defined in the config by adding arguments `--lr` and `--model_name` respectively. The trained model is saved in the `/models` folder.
+<<<<<<< HEAD
 Once the two teacher models are trained, run `distill_student_model.py` to train the student model using the weighted distillation loss.
 - The loss is by default weighted towards inverse loss scores between the teachers. If you'd like to change this to either the minimum or the maximum of the teachers then change the `loss_mode` variable in `distill_student_mode.py` to `weighted`, `min`, or `max` respectively.
+=======
+
+## Training the student
+
+Prebuilt versions of the baseline baby llama, as well as the three models you can train from the instructions below can be found [here](https://drive.google.com/file/d/1eAxvxrhxXVDOg4j3UuI5tfdlrqnU3vc8/view?usp=sharing).
+
+Once the two teacher models are trained, run `distill_student_model.py loss_type` to train the student model using the weighted distillation loss, where `loss_type` is one of the loss types we define.
+- The available loss types that you can train the model with are `min`, `max`, and `weighted`, for minimum/maximum loss and inverse loss weighted training.
+>>>>>>> 43edfb0 (Updated distillation and readme)
 
 We modified the Trainer from this [repository](https://github.com/philschmid/knowledge-distillation-transformers-pytorch-sagemaker). Notice that it is not optimized to run on multiple GPUs (teachers are placed on a single GPU).
 With the current settings (model sizes and batch sizes) everything fits on a single 20GB GPU.
 
+## Evaluating students
+
+To keep parity with the original BabyLlama, we used the 2024 BabyLM evaluation pipeline. That can be found [here](https://github.com/babylm/evaluation-pipeline-2024). Once built, any of the models can be evaluated without further alteration following the evaluation guide from that repository.
 
 
 ## Llama training speed
